@@ -249,7 +249,7 @@ impl ModelBuilder {
             }
             out.push_str(&format!("%{}: {}", pname, format_model_type(pty)));
         }
-        out.push_str(")");
+        out.push(')');
 
         // Return type
         if let Some(ref ret_name) = fb.return_name {
@@ -274,15 +274,17 @@ impl ModelBuilder {
             let input_types: String = op_def
                 .inputs
                 .iter()
-                .filter_map(|n| {
-                    // Look up type: first in params, then in previous op results
-                    if let Some((_, ty)) = fb.params.iter().find(|(pn, _)| pn == n) {
-                        Some(format_model_type(ty))
-                    } else if let Some(prev_op) = fb.ops.iter().find(|o| o.result_name == *n) {
-                        Some(format_model_type(&prev_op.result_type))
-                    } else {
-                        None
-                    }
+                .map(|n| {
+                    fb.params
+                        .iter()
+                        .find(|(pn, _)| pn == n)
+                        .map(|(_, ty)| format_model_type(ty))
+                        .or_else(|| {
+                            fb.ops
+                                .iter()
+                                .find(|o| o.result_name == *n)
+                                .map(|o| format_model_type(&o.result_type))
+                        })
                 })
                 .collect::<Vec<_>>()
                 .join(", ");

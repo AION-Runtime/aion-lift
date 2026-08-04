@@ -124,7 +124,7 @@ impl DataType {
     }
 
     pub fn byte_size(&self) -> usize {
-        (self.bit_width() as usize + 7) / 8
+        self.bit_width().div_ceil(8)
     }
 
     pub fn is_float(&self) -> bool {
