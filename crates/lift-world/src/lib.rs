@@ -6,6 +6,8 @@
 
 pub mod node;
 pub mod relation;
+pub mod world;
 
 pub use node::{Node, NodeId, NodeKind};
 pub use relation::{Relation, RelationId, RelationType};
+pub use world::{MutationError, Snapshot, WorldModel};
