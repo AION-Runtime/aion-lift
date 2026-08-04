@@ -6,8 +6,10 @@
 
 pub mod node;
 pub mod relation;
+pub mod ser;
 pub mod world;
 
 pub use node::{Node, NodeId, NodeKind};
 pub use relation::{Relation, RelationId, RelationType};
+pub use ser::{BinaryFormat, SerializationError};
 pub use world::{MutationError, Snapshot, WorldModel};
