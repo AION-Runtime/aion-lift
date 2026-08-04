@@ -1,0 +1,18 @@
+[package]
+name = "lift-core"
+version = "0.3.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+authors = ["LIFT Framework Contributors"]
+repository = "https://github.com/rustnew/Litf-IR"
+description = "LIFT-CORE (vendored into aion-lift): SSA IR foundation — types, values, operations, blocks, regions, verifier. Reused as the World Model substrate."
+keywords = ["compiler", "ir", "ssa", "type-system", "quantum"]
+categories = ["compilers", "science"]
+
+[dependencies]
+slotmap = { version = "1.0", features = ["serde"] }
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]

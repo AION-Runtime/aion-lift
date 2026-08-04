@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = [
+    "vendor/lift-core",
+    "crates/lift-world",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["AION-Runtime Contributors"]
+repository = "https://github.com/AION-Runtime/aion-lift"
+description = "AION LIFT — the World Model IR: a persistent, versioned knowledge graph for long-horizon autonomous agents."
+
+[workspace.dependencies]
+lift-core = { path = "vendor/lift-core", version = "0.3.0" }
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tracing = "0.1"
+slotmap = { version = "1.0", features = ["serde"] }
