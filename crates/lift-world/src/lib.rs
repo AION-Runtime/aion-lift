@@ -24,5 +24,8 @@ pub use node::{Node, NodeId, NodeKind};
 pub use query::{Neighborhood, Query};
 pub use relation::{Relation, RelationId, RelationType};
 pub use ser::{BinaryFormat, SerializationError};
-pub use verify::{IssueSeverity, ProposedAction, VerificationIssue, VerificationOutcome, VerificationReport, verify_action};
+pub use verify::{
+    verify_action, IssueSeverity, ProposedAction, VerificationIssue, VerificationOutcome,
+    VerificationReport,
+};
 pub use world::{MutationError, Snapshot, WorldModel};

@@ -1,9 +1,9 @@
+use crate::blocks::BlockKey;
+use crate::context::Context;
+use crate::operations::OpKey;
+use crate::values::ValueKey;
 use std::collections::HashSet;
 use thiserror::Error;
-use crate::context::Context;
-use crate::values::ValueKey;
-use crate::operations::OpKey;
-use crate::blocks::BlockKey;
 
 #[derive(Debug, Error)]
 pub enum VerifyError {
@@ -94,7 +94,8 @@ impl<'a> Verifier<'a> {
         for (_op_key, op) in &self.ctx.ops {
             for &result_key in &op.results {
                 if !all_defined.insert(result_key) {
-                    self.errors.push(VerifyError::MultipleDefinition(result_key));
+                    self.errors
+                        .push(VerifyError::MultipleDefinition(result_key));
                 }
             }
         }
@@ -116,23 +117,26 @@ impl<'a> Verifier<'a> {
         for (op_key, op) in &self.ctx.ops {
             for &input in &op.inputs {
                 if !self.ctx.values.contains_key(input) {
-                    self.errors.push(VerifyError::DanglingReference(
-                        format!("Operation {:?} references non-existent value {:?}", op_key, input),
-                    ));
+                    self.errors.push(VerifyError::DanglingReference(format!(
+                        "Operation {:?} references non-existent value {:?}",
+                        op_key, input
+                    )));
                 }
             }
             for &result in &op.results {
                 if !self.ctx.values.contains_key(result) {
-                    self.errors.push(VerifyError::DanglingReference(
-                        format!("Operation {:?} references non-existent result {:?}", op_key, result),
-                    ));
+                    self.errors.push(VerifyError::DanglingReference(format!(
+                        "Operation {:?} references non-existent result {:?}",
+                        op_key, result
+                    )));
                 }
             }
             for &region in &op.regions {
                 if !self.ctx.regions.contains_key(region) {
-                    self.errors.push(VerifyError::DanglingReference(
-                        format!("Operation {:?} references non-existent region {:?}", op_key, region),
-                    ));
+                    self.errors.push(VerifyError::DanglingReference(format!(
+                        "Operation {:?} references non-existent region {:?}",
+                        op_key, region
+                    )));
                 }
             }
         }
@@ -141,9 +145,10 @@ impl<'a> Verifier<'a> {
         for (block_key, block) in &self.ctx.blocks {
             for &op in &block.ops {
                 if !self.ctx.ops.contains_key(op) {
-                    self.errors.push(VerifyError::DanglingReference(
-                        format!("Block {:?} references non-existent operation {:?}", block_key, op),
-                    ));
+                    self.errors.push(VerifyError::DanglingReference(format!(
+                        "Block {:?} references non-existent operation {:?}",
+                        block_key, op
+                    )));
                 }
             }
         }
@@ -152,9 +157,10 @@ impl<'a> Verifier<'a> {
         for (region_key, region) in &self.ctx.regions {
             for &block in &region.blocks {
                 if !self.ctx.blocks.contains_key(block) {
-                    self.errors.push(VerifyError::DanglingReference(
-                        format!("Region {:?} references non-existent block {:?}", region_key, block),
-                    ));
+                    self.errors.push(VerifyError::DanglingReference(format!(
+                        "Region {:?} references non-existent block {:?}",
+                        region_key, block
+                    )));
                 }
             }
         }
@@ -269,6 +275,8 @@ mod tests {
         let result = verify(&ctx);
         assert!(result.is_err());
         let errors = result.unwrap_err();
-        assert!(errors.iter().any(|e| matches!(e, VerifyError::LinearityViolation(_))));
+        assert!(errors
+            .iter()
+            .any(|e| matches!(e, VerifyError::LinearityViolation(_))));
     }
 }

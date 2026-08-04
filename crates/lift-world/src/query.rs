@@ -93,7 +93,10 @@ impl<'a> Query<'a> {
                 self.data_path
                     .as_ref()
                     .map(|(path, expected)| {
-                        n.data.pointer(&json_pointer(path)).map(|v| v == expected).unwrap_or(false)
+                        n.data
+                            .pointer(&json_pointer(path))
+                            .map(|v| v == expected)
+                            .unwrap_or(false)
                     })
                     .unwrap_or(true)
             })
@@ -242,7 +245,10 @@ mod tests {
         let revenues = Query::new(&wm).label_contains("revenue").collect();
         assert_eq!(revenues.len(), 3);
 
-        let contracts = Query::new(&wm).kind(NodeKind::Entity).label_contains("contract").collect();
+        let contracts = Query::new(&wm)
+            .kind(NodeKind::Entity)
+            .label_contains("contract")
+            .collect();
         assert_eq!(contracts.len(), 1);
         assert_eq!(contracts[0].label, "contract.pdf");
 
@@ -258,12 +264,19 @@ mod tests {
         let o = wm.add_observation("amount");
         let okey = o;
         if let Some(n) = wm.node_mut(okey) {
-            *n = n.clone().with_data(serde_json::json!({"amount": 4200, "meta": {"currency": "EUR"}})).unwrap();
+            *n = n
+                .clone()
+                .with_data(serde_json::json!({"amount": 4200, "meta": {"currency": "EUR"}}))
+                .unwrap();
         }
         let _ = e;
-        let hits = Query::new(&wm).data("meta.currency", serde_json::json!("EUR")).collect();
+        let hits = Query::new(&wm)
+            .data("meta.currency", serde_json::json!("EUR"))
+            .collect();
         assert_eq!(hits.len(), 1);
-        let misses = Query::new(&wm).data("amount", serde_json::json!(999)).collect();
+        let misses = Query::new(&wm)
+            .data("amount", serde_json::json!(999))
+            .collect();
         assert!(misses.is_empty());
     }
 

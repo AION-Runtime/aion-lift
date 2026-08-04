@@ -5,7 +5,7 @@
 //! restored — the primitive behind crash recovery and rollback.
 
 use serde::{Deserialize, Serialize};
-use slotmap::{SlotMap, SecondaryMap};
+use slotmap::{SecondaryMap, SlotMap};
 use thiserror::Error;
 
 use crate::node::{Node, NodeId};
@@ -27,7 +27,11 @@ pub enum MutationError {
     #[error("relation endpoints {from:?} and {to:?} are the same node")]
     SelfRelation { from: NodeId, to: NodeId },
     #[error("relation would create a cycle of kind {kind:?} between {from:?} and {to:?}")]
-    Cycle { from: NodeId, to: NodeId, kind: RelationType },
+    Cycle {
+        from: NodeId,
+        to: NodeId,
+        kind: RelationType,
+    },
     #[error("cannot delete node {0:?}: it still has {1} incident relations")]
     NodeStillConnected(NodeId, usize),
     #[error("snapshot {0} not found")]
@@ -125,7 +129,8 @@ impl WorldModel {
     pub fn add_observation(&mut self, label: impl Into<String>) -> NodeKey {
         let id = NodeId(self.next_node_id);
         self.next_node_id += 1;
-        self.insert_node(Node::observation(id, label)).expect("fresh id")
+        self.insert_node(Node::observation(id, label))
+            .expect("fresh id")
     }
 
     /// Returns the node at `key`, if any.
@@ -158,7 +163,11 @@ impl WorldModel {
 
     /// Removes a node and all its incident relations.
     pub fn remove_node(&mut self, key: NodeKey) -> Result<Node, MutationError> {
-        let node = self.nodes.get(key).cloned().ok_or(MutationError::UnknownNode(NodeId(0)))?;
+        let node = self
+            .nodes
+            .get(key)
+            .cloned()
+            .ok_or(MutationError::UnknownNode(NodeId(0)))?;
         // Drop incident relations.
         let rel_keys: Vec<RelationKey> = self
             .rels
@@ -187,7 +196,10 @@ impl WorldModel {
     /// Inserts a relation, validating endpoints and rejecting self-loops.
     pub fn insert_relation(&mut self, rel: Relation) -> Result<RelationKey, MutationError> {
         if rel.from == rel.to {
-            return Err(MutationError::SelfRelation { from: rel.from, to: rel.to });
+            return Err(MutationError::SelfRelation {
+                from: rel.from,
+                to: rel.to,
+            });
         }
         if self.find_node(rel.from).is_none() {
             return Err(MutationError::UnknownNode(rel.from));
@@ -204,9 +216,22 @@ impl WorldModel {
     }
 
     /// Adds a typed relation between two nodes with auto-assigned ids.
-    pub fn relate(&mut self, from: NodeKey, to: NodeKey, kind: RelationType) -> Result<RelationKey, MutationError> {
-        let from_id = self.nodes.get(from).map(|n| n.id).ok_or(MutationError::UnknownNode(NodeId(0)))?;
-        let to_id = self.nodes.get(to).map(|n| n.id).ok_or(MutationError::UnknownNode(NodeId(0)))?;
+    pub fn relate(
+        &mut self,
+        from: NodeKey,
+        to: NodeKey,
+        kind: RelationType,
+    ) -> Result<RelationKey, MutationError> {
+        let from_id = self
+            .nodes
+            .get(from)
+            .map(|n| n.id)
+            .ok_or(MutationError::UnknownNode(NodeId(0)))?;
+        let to_id = self
+            .nodes
+            .get(to)
+            .map(|n| n.id)
+            .ok_or(MutationError::UnknownNode(NodeId(0)))?;
         let id = RelationId(self.next_rel_id);
         self.next_rel_id += 1;
         self.insert_relation(Relation::new(id, from_id, to_id, kind))
@@ -214,7 +239,12 @@ impl WorldModel {
 
     /// Adds a typed relation between two nodes referenced by their stable
     /// `NodeId`s (convenience for callers that track ids, not arena keys).
-    pub fn relate_by_id(&mut self, from: NodeId, to: NodeId, kind: RelationType) -> Result<RelationKey, MutationError> {
+    pub fn relate_by_id(
+        &mut self,
+        from: NodeId,
+        to: NodeId,
+        kind: RelationType,
+    ) -> Result<RelationKey, MutationError> {
         let from_key = self
             .node_by_id
             .iter()
@@ -237,7 +267,10 @@ impl WorldModel {
 
     /// Removes a relation.
     pub fn remove_relation(&mut self, key: RelationKey) -> Result<Relation, MutationError> {
-        let rel = self.rels.remove(key).ok_or(MutationError::UnknownRelation(RelationId(0)))?;
+        let rel = self
+            .rels
+            .remove(key)
+            .ok_or(MutationError::UnknownRelation(RelationId(0)))?;
         self.rel_by_id.remove(key);
         Ok(rel)
     }
@@ -403,7 +436,12 @@ mod tests {
         let mut wm = WorldModel::new();
         wm.add_entity("a");
         let v = wm.snapshot();
-        let snap = wm.history().iter().find(|s| s.version == v).unwrap().clone();
+        let snap = wm
+            .history()
+            .iter()
+            .find(|s| s.version == v)
+            .unwrap()
+            .clone();
         let bytes = snap.to_json().unwrap();
         let back = Snapshot::from_json(&bytes).unwrap();
         assert_eq!(back, snap);

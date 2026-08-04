@@ -55,7 +55,7 @@ impl BinaryFormat {
         let mut out = Vec::with_capacity(16 + payload.len());
         out.extend_from_slice(&Self::MAGIC);
         out.push(1); // format version
-        // 4-byte big-endian payload length
+                     // 4-byte big-endian payload length
         out.extend_from_slice(&(payload.len() as u32).to_be_bytes());
         out.extend_from_slice(&payload);
         Ok(out)
@@ -64,7 +64,9 @@ impl BinaryFormat {
     /// Decodes a binary snapshot back into a `Snapshot`.
     pub fn decode_snapshot(bytes: &[u8]) -> Result<Snapshot, SerializationError> {
         if bytes.len() < 9 {
-            return Err(SerializationError::Corrupt("header shorter than 9 bytes".into()));
+            return Err(SerializationError::Corrupt(
+                "header shorter than 9 bytes".into(),
+            ));
         }
         if bytes[0..4] != Self::MAGIC {
             return Err(SerializationError::Corrupt("bad magic".into()));
@@ -92,7 +94,9 @@ impl BinaryFormat {
     /// Parses binary bytes into a `BinaryFormat`.
     pub fn parse(bytes: &[u8]) -> Result<Self, SerializationError> {
         if bytes.len() < 9 {
-            return Err(SerializationError::Corrupt("header shorter than 9 bytes".into()));
+            return Err(SerializationError::Corrupt(
+                "header shorter than 9 bytes".into(),
+            ));
         }
         if bytes[0..4] != Self::MAGIC {
             return Err(SerializationError::Corrupt("bad magic".into()));

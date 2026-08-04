@@ -43,7 +43,9 @@ pub struct VerificationReport {
 impl VerificationReport {
     /// True when the report contains blocking errors.
     pub fn is_blocked(&self) -> bool {
-        self.issues.iter().any(|i| i.severity == IssueSeverity::Error)
+        self.issues
+            .iter()
+            .any(|i| i.severity == IssueSeverity::Error)
     }
 
     /// True when the report is clean (no issues at all).
@@ -53,7 +55,10 @@ impl VerificationReport {
 
     /// Number of blocking errors.
     pub fn error_count(&self) -> usize {
-        self.issues.iter().filter(|i| i.severity == IssueSeverity::Error).count()
+        self.issues
+            .iter()
+            .filter(|i| i.severity == IssueSeverity::Error)
+            .count()
     }
 }
 
@@ -82,7 +87,11 @@ pub struct ProposedAction {
 /// `claim` parameter is an optional JSON pointer path (e.g. `"amount"`) to a
 /// fact the action asserts; if the same path already carries a different
 /// value, the action is blocked.
-pub fn verify_action(wm: &WorldModel, _action: &ProposedAction, claim: Option<(&str, &serde_json::Value)>) -> VerificationOutcome {
+pub fn verify_action(
+    wm: &WorldModel,
+    _action: &ProposedAction,
+    claim: Option<(&str, &serde_json::Value)>,
+) -> VerificationOutcome {
     let mut report = VerificationReport::default();
 
     // 1. Existing explicit contradictions in the graph are always surfaced.
@@ -146,7 +155,10 @@ mod tests {
         let e = wm.add_entity("contract");
         let o = wm.add_observation("revenue");
         if let Some(n) = wm.node_mut(o) {
-            *n = n.clone().with_data(serde_json::json!({"amount": 4200})).unwrap();
+            *n = n
+                .clone()
+                .with_data(serde_json::json!({"amount": 4200}))
+                .unwrap();
         }
         wm.relate(e, o, RelationType::HasProperty).unwrap();
         wm
@@ -194,7 +206,10 @@ mod tests {
         let outcome = verify_action(&wm, &action, None);
         match outcome {
             VerificationOutcome::Blocked(report) => {
-                assert!(report.issues.iter().any(|i| i.code == "EXISTING_CONTRADICTION"));
+                assert!(report
+                    .issues
+                    .iter()
+                    .any(|i| i.code == "EXISTING_CONTRADICTION"));
             }
             VerificationOutcome::Allowed => panic!("must be blocked"),
         }

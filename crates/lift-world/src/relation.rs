@@ -94,7 +94,12 @@ impl Relation {
 
     /// Convenience constructor for a `Contradicts` edge with an explanatory
     /// payload describing the two conflicting facts.
-    pub fn contradiction(id: RelationId, from: NodeId, to: NodeId, reason: impl Serialize) -> Result<Self, serde_json::Error> {
+    pub fn contradiction(
+        id: RelationId,
+        from: NodeId,
+        to: NodeId,
+        reason: impl Serialize,
+    ) -> Result<Self, serde_json::Error> {
         let mut r = Self::new(id, from, to, RelationType::Contradicts);
         r.data = serde_json::to_value(reason)?;
         r.revision += 1;
