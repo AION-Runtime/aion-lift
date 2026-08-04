@@ -5,5 +5,7 @@
 //! the graph/serialization substrate (slotmap keys, interning, serde).
 
 pub mod node;
+pub mod relation;
 
 pub use node::{Node, NodeId, NodeKind};
+pub use relation::{Relation, RelationId, RelationType};
