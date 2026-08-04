@@ -146,6 +146,16 @@ impl WorldModel {
             .and_then(|(k, _)| self.nodes.get(k))
     }
 
+    /// Returns a mutable reference to a node by its stable `NodeId`.
+    pub fn node_mut_by_id(&mut self, id: NodeId) -> Option<&mut Node> {
+        let key = self
+            .node_by_id
+            .iter()
+            .find(|(_, v)| **v == id)
+            .map(|(k, _)| k)?;
+        self.nodes.get_mut(key)
+    }
+
     /// Removes a node and all its incident relations.
     pub fn remove_node(&mut self, key: NodeKey) -> Result<Node, MutationError> {
         let node = self.nodes.get(key).cloned().ok_or(MutationError::UnknownNode(NodeId(0)))?;
@@ -200,6 +210,24 @@ impl WorldModel {
         let id = RelationId(self.next_rel_id);
         self.next_rel_id += 1;
         self.insert_relation(Relation::new(id, from_id, to_id, kind))
+    }
+
+    /// Adds a typed relation between two nodes referenced by their stable
+    /// `NodeId`s (convenience for callers that track ids, not arena keys).
+    pub fn relate_by_id(&mut self, from: NodeId, to: NodeId, kind: RelationType) -> Result<RelationKey, MutationError> {
+        let from_key = self
+            .node_by_id
+            .iter()
+            .find(|(_, v)| **v == from)
+            .map(|(k, _)| k)
+            .ok_or(MutationError::UnknownNode(from))?;
+        let to_key = self
+            .node_by_id
+            .iter()
+            .find(|(_, v)| **v == to)
+            .map(|(k, _)| k)
+            .ok_or(MutationError::UnknownNode(to))?;
+        self.relate(from_key, to_key, kind)
     }
 
     /// Returns the relation at `key`, if any.
