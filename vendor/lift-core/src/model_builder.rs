@@ -274,7 +274,7 @@ impl ModelBuilder {
             let input_types: String = op_def
                 .inputs
                 .iter()
-                .map(|n| {
+                .filter_map(|n| {
                     fb.params
                         .iter()
                         .find(|(pn, _)| pn == n)

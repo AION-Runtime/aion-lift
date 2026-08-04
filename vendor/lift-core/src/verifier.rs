@@ -182,10 +182,12 @@ impl<'a> Verifier<'a> {
             let op_name = self.ctx.strings.resolve(op.name);
 
             for &input in &op.inputs {
-                if let Some(val) = self.ctx.values.get(input)
-                    && self.ctx.is_qubit_type(val.ty)
-                    && !consumed.insert(input)
-                {
+                let is_qubit = self
+                    .ctx
+                    .values
+                    .get(input)
+                    .is_some_and(|val| self.ctx.is_qubit_type(val.ty));
+                if is_qubit && !consumed.insert(input) {
                     self.errors.push(VerifyError::LinearityViolation(input));
                 }
             }
